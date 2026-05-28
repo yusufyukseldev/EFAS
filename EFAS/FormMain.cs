@@ -26,13 +26,11 @@ namespace EFAS
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
-            LoadDashboardChart();
-            LoadAnalysisData();
-            LoadExpenses();
+
 
             txtExpenseTitle.PlaceholderText = "Harcama Adı";
             txtExpenseAmount.PlaceholderText = "Harcama Tutarı";
-            LoadDashboardStats();
+
         }
         private void LoadDashboardStats()
         {
@@ -130,7 +128,7 @@ namespace EFAS
                     expenses.Add(new ExpenseModel { Id = 3, Title = "Yeni Kask (ECE Sertifikalı)", Amount = 4500 });
                 }
 
-             
+
             }
         }
 
@@ -144,18 +142,26 @@ namespace EFAS
         // 1. VERİLERİ TABLOYA ÇEKME (READ)
         private void LoadExpenses()
         {
-            // 1. DOKUNUŞ: Tabloya yeni veri basmadan önce içindeki tüm eski/çift sütunları yok ediyoruz!
+            // 1. Önce tabloyu tamamen sıfırlıyoruz
             dgvExpenses.DataSource = null;
             dgvExpenses.Columns.Clear();
+            dgvExpenses.AutoGenerateColumns = true;
 
             using (var connection = DbHelper.GetConnection())
             {
-                // Dapper ile verileri çekip doğrudan DataGridView'e bağlıyoruz
-                var expenses = connection.Query("SELECT Id, Title AS 'Harcama Kalemi', Amount AS 'Tutar (TL)', Date AS 'Tarih' FROM Expenses").AsList();
+                // 2. WinForms'un hata vermeyen kendi sınıfı DataTable'ı yaratıyoruz
+                var dt = new System.Data.DataTable();
 
-                dgvExpenses.DataSource = expenses;
+                // 3. Dapper ile veriyi "Liste" olarak değil, doğrudan "Tablo" olarak okuyoruz!
+                using (var reader = connection.ExecuteReader("SELECT Id, Title AS 'Harcama Kalemi', Amount AS 'Tutar (TL)', Date AS 'Tarih' FROM Expenses"))
+                {
+                    dt.Load(reader);
+                }
 
-                // Id sütununu gizleyelim ki ekranda çirkin durmasın
+                // 4. Jilet gibi temizlenmiş veriyi ekrana basıyoruz
+                dgvExpenses.DataSource = dt;
+
+                // 5. Arka planda silme işlemi için duran Id'yi gizliyoruz
                 if (dgvExpenses.Columns["Id"] != null)
                 {
                     dgvExpenses.Columns["Id"].Visible = false;
@@ -167,42 +173,29 @@ namespace EFAS
         // Ekle butonuna çift tıklayıp içine şu kodları yaz:
         private void btnAddExpense_Click(object sender, EventArgs e)
         {
-            // 1. KUTULAR BOŞ MU KONTROLÜ
             if (string.IsNullOrWhiteSpace(txtExpenseTitle.Text) || string.IsNullOrWhiteSpace(txtExpenseAmount.Text))
             {
                 MessageBox.Show("Lütfen harcama adını ve tutarını girin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. SAYI YERİNE HARF GİRİLMİŞ Mİ KONTROLÜ (Hayat kurtaran kısım)
-            double safeAmount;
-            // TryParse: "İçindeki yazıyı sayıya çevirmeyi dene, yapamazsan bana false dön" demek.
-            if (!double.TryParse(txtExpenseAmount.Text, out safeAmount))
+            if (!double.TryParse(txtExpenseAmount.Text, out double safeAmount))
             {
-                MessageBox.Show("Lütfen tutar kısmına sadece rakam giriniz! (Örn: 1500 veya 1500,50)", "Hatalı Giriş", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return; // Sayı değilse işlemi iptal et ve aşağı inme
+                MessageBox.Show("Lütfen tutar kısmına sadece rakam giriniz!", "Hatalı Giriş", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            // 3. VERİTABANINA KAYIT İŞLEMİ
             using (var connection = DbHelper.GetConnection())
             {
                 string query = "INSERT INTO Expenses (Title, Amount, Date) VALUES (@Title, @Amount, @Date)";
-
-                // Dapper ile parametreleri gönderiyoruz (Artık safeAmount kullanıyoruz)
-                connection.Execute(query, new
-                {
-                    Title = txtExpenseTitle.Text,
-                    Amount = safeAmount,
-                    Date = DateTime.Now.ToString("dd.MM.yyyy")
-                });
+                connection.Execute(query, new { Title = txtExpenseTitle.Text, Amount = safeAmount, Date = DateTime.Now.ToString("dd.MM.yyyy") });
 
                 MessageBox.Show("Harcama başarıyla eklendi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // İşlem bitince kutuları temizle
                 txtExpenseTitle.Clear();
                 txtExpenseAmount.Clear();
 
-                // Tüm sistemi anında güncelle
+                // Sistemi anında güncelle
                 LoadExpenses();
                 LoadDashboardChart();
                 LoadAnalysisData();
@@ -214,10 +207,8 @@ namespace EFAS
         // Sil butonuna çift tıklayıp içine şu kodları yaz:
         private void btnDeleteExpense_Click(object sender, EventArgs e)
         {
-            // Tabloda seçili bir satır yoksa hiçbir şey yapma
             if (dgvExpenses.CurrentRow == null) return;
 
-            // Seçili satırın gizli olan 'Id' değerini al
             int selectedId = Convert.ToInt32(dgvExpenses.CurrentRow.Cells["Id"].Value);
 
             using (var connection = DbHelper.GetConnection())
@@ -225,7 +216,6 @@ namespace EFAS
                 connection.Execute("DELETE FROM Expenses WHERE Id = @Id", new { Id = selectedId });
                 MessageBox.Show("Seçilen harcama başarıyla silindi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Silinince de tüm sistemleri dinamik olarak güncelle
                 LoadExpenses();
                 LoadDashboardChart();
                 LoadAnalysisData();
@@ -270,6 +260,7 @@ namespace EFAS
 
         }
 
+
         private void btnCalculate_Click(object sender, EventArgs e)
         {
             // 1. Kutudaki maliyeti (txtBoxB) rakam olarak almayı deniyoruz
@@ -308,7 +299,200 @@ namespace EFAS
                                 $"toplam {Math.Round(gerekenSaat, 1)} SAAT efor üretmesi gerekmektedir.";
             }
         }
+
+        private async void FormMain_Shown(object sender, EventArgs e)
+        {
+            await Task.Delay(100);
+
+            TabloMakyajiniUygula(dgvExpenses);
+            TabloMakyajiniUygula(dgvPersonel);
+
+            LoadDashboardChart();
+            LoadAnalysisData();
+            LoadExpenses();
+            LoadDashboardStats();
+        }
+
+        private void btnDeleteExpense_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+
+        // Parametre olarak dışarıdan bir DataGridView (dgv) alan genel makyaj metodumuz
+        private void TabloMakyajiniUygula(DataGridView dgv)
+        {
+            // Tablonun genel arka planı ve dış çizgilerini temizliyoruz
+            dgv.BackgroundColor = Color.White;
+            dgv.BorderStyle = BorderStyle.None;
+
+            // Sadece yatay çizgiler kalsın (Modern web sitelerindeki gibi)
+            dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+
+            // Satırların rengi bir beyaz, bir açık gri olsun (Gözü yormaz)
+            dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(245, 245, 245);
+
+            // Fareyle bir satırı seçtiğimizde o iğrenç standart mavi yerine menümüzün rengi olsun
+            dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(60, 60, 90);
+            dgv.DefaultCellStyle.SelectionForeColor = Color.White;
+
+            // EN ÖNEMLİSİ: Windows'un o çirkin gri başlıklarını ezmek için izni kapatıyoruz!
+            dgv.EnableHeadersVisualStyles = false;
+
+            // Başlıkların (Harcama Kalemi, Tutar vs.) rengini sol menüyle uyumlu yapıyoruz
+            dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+            dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(45, 45, 75);
+            dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            dgv.ColumnHeadersHeight = 40;
+
+            // Tablonun en altındaki o çirkin boş ekleme satırını yok et
+            dgv.AllowUserToAddRows = false;
+
+            // Tabloyu sadece "Okunabilir" yap, içindeki yazıları kimse bozamasın
+            dgv.ReadOnly = true;
+
+            // Bir hücreye tıklandığında sadece o kutuyu değil, BÜTÜN SATIRI boydan boya seç
+            dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        }
+
+
+        // 1. PERSONEL TABLOSUNU YÜKLEME (DataTable ve Dapper ile sıfır hata)
+        private void LoadPersonnels()
+        {
+            dgvPersonel.DataSource = null;
+
+            using (var connection = DbHelper.GetConnection())
+            {
+                var dt = new System.Data.DataTable();
+
+                // SQL Sorgusu: Sütun isimlerini ekrana basılacak şekilde Türkçe ayarlıyoruz
+                string query = "SELECT Id, FullName AS 'Ad Soyad', Department AS 'Departman', HourlyRate AS 'Saatlik Ücret (TL)' FROM Personnels";
+
+                using (var reader = connection.ExecuteReader(query))
+                {
+                    dt.Load(reader);
+                }
+
+                dgvPersonel.DataSource = dt;
+
+                // Id sütununu gizle (Silme işlemi için arkada beklesin)
+                if (dgvPersonel.Columns["Id"] != null)
+                    dgvPersonel.Columns["Id"].Visible = false;
+            }
+        }
+
+        // 2. YENİ PERSONEL EKLEME
+        private void btnAddPersonnel_Click(object sender, EventArgs e)
+        {
+            // Boş kutu kontrolü
+            if (string.IsNullOrWhiteSpace(txtPerAd.Text) || string.IsNullOrWhiteSpace(txtPerUcret.Text))
+            {
+                MessageBox.Show("Lütfen en azından Personel Adı ve Saatlik Ücret kısımlarını doldurun!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Ücret kısmına harf girilmesini engelle
+            if (!double.TryParse(txtPerUcret.Text, out double safeUcret))
+            {
+                MessageBox.Show("Lütfen ücret kısmına sadece rakam giriniz!", "Hatalı Giriş", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using (var connection = DbHelper.GetConnection())
+            {
+                string query = "INSERT INTO Personnels (FullName, Department, HourlyRate) VALUES (@FullName, @Department, @HourlyRate)";
+                connection.Execute(query, new { FullName = txtPerAd.Text, Department = txtPerDepartman.Text, HourlyRate = safeUcret });
+
+                MessageBox.Show("Yeni personel sisteme başarıyla eklendi!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                txtPerAd.Clear();
+                txtPerDepartman.Clear();
+                txtPerUcret.Clear();
+
+                // Listeyi anında güncelle
+                LoadPersonnels();
+
+                // Eğer Ana Sayfada personel sayısını gösteren bir metodun varsa onu da tetikle:
+                // LoadDashboardStats(); 
+            }
+        }
+
+        // 3. SEÇİLİ PERSONELİ SİLME
+        private void btnDeletePersonnel_Click(object sender, EventArgs e)
+        {
+            if (dgvPersonel.CurrentRow == null) return;
+
+            int selectedId = Convert.ToInt32(dgvPersonel.CurrentRow.Cells["Id"].Value);
+            string selectedName = dgvPersonel.CurrentRow.Cells["Ad Soyad"].Value.ToString();
+
+            // Kurumsal programlarda silmeden önce mutlaka emin misin diye sorulur!
+            DialogResult secim = MessageBox.Show($"{selectedName} adlı personeli sistemden silmek istediğinize emin misiniz?", "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (secim == DialogResult.Yes)
+            {
+                using (var connection = DbHelper.GetConnection())
+                {
+                    connection.Execute("DELETE FROM Personnels WHERE Id = @Id", new { Id = selectedId });
+                    LoadPersonnels();
+                }
+            }
+        }
+
+
+        private void btnExportExcel_Click(object sender, EventArgs e)
+        {
+            // Tabloda veri yoksa boşuna dosya oluşturmayalım
+            if (dgvExpenses.Rows.Count == 0)
+            {
+                MessageBox.Show("Dışa aktarılacak hiçbir harcama bulunamadı!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Kullanıcıya dosyayı nereye kaydedeceğini soran o havalı Windows penceresi
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Excel Uyumlu Dosya (*.csv)|*.csv";
+            sfd.FileName = "EFAS_Gider_Raporu_" + DateTime.Now.ToString("dd_MM_yyyy") + ".csv";
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+                    // 1. Önce Sütun Başlıklarını Alıyoruz
+                    var headers = dgvExpenses.Columns.Cast<DataGridViewColumn>()
+                                          .Where(c => c.Visible) // Sadece ekranda görünenleri (Id hariç) al
+                                          .Select(c => c.HeaderText);
+                    sb.AppendLine(string.Join(";", headers));
+
+                    // 2. Şimdi Satırları Tek Tek Dönüp İçindeki Verileri Alıyoruz
+                    foreach (DataGridViewRow row in dgvExpenses.Rows)
+                    {
+                        var cells = row.Cells.Cast<DataGridViewCell>()
+                                       .Where(c => dgvExpenses.Columns[c.ColumnIndex].Visible)
+                                       .Select(c => c.Value?.ToString().Replace(";", ",")); // Excel karışmasın diye noktalı virgülleri temizliyoruz
+                        sb.AppendLine(string.Join(";", cells));
+                    }
+
+                    // 3. Dosyayı Masaüstüne (veya seçilen yere) Türkçe Karakter (UTF8) desteğiyle yaz!
+                    System.IO.File.WriteAllText(sfd.FileName, sb.ToString(), new System.Text.UTF8Encoding(true));
+
+                    MessageBox.Show("Kurumsal Excel Raporu başarıyla masaüstüne kaydedildi!", "Sistem Mesajı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Dosya oluşturulurken hata çıktı: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+        }
     }
+
     // Bu sınıf, harcamaları ComboBox'ta "İsim (Tutar TL)" şeklinde şık göstermemizi sağlayacak
     public class ExpenseModel
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
-using System.Security.Cryptography; // Şifreleme kütüphanesi
+using System.Security.Cryptography;
 using System.Text;
 using Dapper;
 
@@ -23,44 +23,55 @@ namespace CorporateFinanceManager
                 {
                     builder.Append(bytes[i].ToString("x2"));
                 }
-                return builder.ToString(); // Örn: 1234 -> 03ac674216f3e15c...
+                return builder.ToString();
             }
         }
 
+        // VERİTABANI İLK KURULUMU (Tüm tablolar burada yaratılır)
         public static void InitializeDatabase()
         {
-            // Dosya hiç yoksa fiziki olarak yarat
             if (!File.Exists(DbFileName))
             {
                 SQLiteConnection.CreateFile(DbFileName);
             }
 
-            // Her halükarda bağlan ve tabloların durumunu kontrol et
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 connection.Open();
 
-                // Tablolar yoksa oluştur (IF NOT EXISTS hayat kurtarır)
+                // 1. KULLANICILAR TABLOSU
                 string createUsersTable = @"
-            CREATE TABLE IF NOT EXISTS Users (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Username TEXT NOT NULL,
-                PasswordHash TEXT NOT NULL, 
-                HourlyRate REAL NOT NULL
-            );";
+                CREATE TABLE IF NOT EXISTS Users (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Username TEXT NOT NULL,
+                    PasswordHash TEXT NOT NULL, 
+                    HourlyRate REAL NOT NULL
+                );";
 
+                // 2. GİDERLER TABLOSU
                 string createExpensesTable = @"
-            CREATE TABLE IF NOT EXISTS Expenses (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Title TEXT NOT NULL,
-                Amount REAL NOT NULL,
-                Date TEXT NOT NULL
-            );";
+                CREATE TABLE IF NOT EXISTS Expenses (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Title TEXT NOT NULL,
+                    Amount REAL NOT NULL,
+                    Date TEXT NOT NULL
+                );";
 
+                // 3. PERSONELLER TABLOSU (İşte olması gereken doğru yer!)
+                string createPersonnelsTable = @"
+                CREATE TABLE IF NOT EXISTS Personnels (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    FullName TEXT NOT NULL,
+                    Department TEXT,
+                    HourlyRate REAL NOT NULL
+                );";
+
+                // Tabloları veritabanına işle
                 connection.Execute(createUsersTable);
                 connection.Execute(createExpensesTable);
+                connection.Execute(createPersonnelsTable);
 
-                // Sisteme daha önce admin eklenmemişse ekle (Çift kayıt olmasını engeller)
+                // Admin hesabı kontrolü
                 var adminExists = connection.QueryFirstOrDefault("SELECT * FROM Users WHERE Username = 'admin'");
                 if (adminExists == null)
                 {
@@ -73,6 +84,7 @@ namespace CorporateFinanceManager
             }
         }
 
+        // VERİ ÇEKMEK İÇİN KULLANILAN SAF BAĞLANTI (İçinde işlem yapılmaz, sadece kapı açar)
         public static SQLiteConnection GetConnection()
         {
             return new SQLiteConnection(ConnectionString);
