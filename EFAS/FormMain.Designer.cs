@@ -49,6 +49,7 @@
             label3 = new Label();
             panelChart = new Panel();
             tabPage2 = new TabPage();
+            btnUpdateExpense = new Button();
             btnDeleteExpense = new Button();
             btnAddExpense = new Button();
             txtExpenseAmount = new TextBox();
@@ -56,6 +57,7 @@
             btnExportExcel = new Button();
             dgvExpenses = new DataGridView();
             tabPage3 = new TabPage();
+            btnUpdatePersonnel = new Button();
             txtPerUcret = new TextBox();
             btnDeletePersonnel = new Button();
             btnAddPersonnel = new Button();
@@ -64,15 +66,14 @@
             button3 = new Button();
             dgvPersonel = new DataGridView();
             tabPage4 = new TabPage();
+            roundedPanel3 = new RoundedPanel();
+            lblSonuc = new Label();
             panel7 = new Panel();
             roundedPanel1 = new RoundedPanel();
             label6 = new Label();
             btnCalculate = new Button();
             txtBoxB = new TextBox();
             txtBoxA = new TextBox();
-            panel6 = new Panel();
-            flowLayoutPanel1 = new FlowLayoutPanel();
-            lblSonuc = new Label();
             panel1.SuspendLayout();
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
@@ -85,9 +86,9 @@
             tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPersonel).BeginInit();
             tabPage4.SuspendLayout();
+            roundedPanel3.SuspendLayout();
             panel7.SuspendLayout();
             roundedPanel1.SuspendLayout();
-            panel6.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
@@ -143,7 +144,7 @@
             btnExpenses.FlatStyle = FlatStyle.Flat;
             btnExpenses.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnExpenses.ForeColor = Color.DarkSlateBlue;
-            btnExpenses.Location = new Point(23, 278);
+            btnExpenses.Location = new Point(23, 288);
             btnExpenses.Name = "btnExpenses";
             btnExpenses.Size = new Size(161, 38);
             btnExpenses.TabIndex = 1;
@@ -160,7 +161,7 @@
             btnPersonnel.FlatStyle = FlatStyle.Flat;
             btnPersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnPersonnel.ForeColor = Color.DarkSlateBlue;
-            btnPersonnel.Location = new Point(23, 440);
+            btnPersonnel.Location = new Point(23, 444);
             btnPersonnel.Name = "btnPersonnel";
             btnPersonnel.Size = new Size(161, 38);
             btnPersonnel.TabIndex = 2;
@@ -346,6 +347,7 @@
             // 
             // tabPage2
             // 
+            tabPage2.Controls.Add(btnUpdateExpense);
             tabPage2.Controls.Add(btnDeleteExpense);
             tabPage2.Controls.Add(btnAddExpense);
             tabPage2.Controls.Add(txtExpenseAmount);
@@ -360,6 +362,23 @@
             tabPage2.Text = "tabPage2";
             tabPage2.UseVisualStyleBackColor = true;
             // 
+            // btnUpdateExpense
+            // 
+            btnUpdateExpense.Anchor = AnchorStyles.Top;
+            btnUpdateExpense.BackColor = Color.SteelBlue;
+            btnUpdateExpense.Cursor = Cursors.Hand;
+            btnUpdateExpense.FlatAppearance.BorderSize = 0;
+            btnUpdateExpense.FlatStyle = FlatStyle.Flat;
+            btnUpdateExpense.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnUpdateExpense.ForeColor = Color.White;
+            btnUpdateExpense.Location = new Point(587, 113);
+            btnUpdateExpense.Name = "btnUpdateExpense";
+            btnUpdateExpense.Size = new Size(280, 33);
+            btnUpdateExpense.TabIndex = 14;
+            btnUpdateExpense.Text = "Harcamayı Güncelle";
+            btnUpdateExpense.UseVisualStyleBackColor = false;
+            btnUpdateExpense.Click += btnUpdateExpense_Click;
+            // 
             // btnDeleteExpense
             // 
             btnDeleteExpense.Anchor = AnchorStyles.Top;
@@ -369,7 +388,7 @@
             btnDeleteExpense.FlatStyle = FlatStyle.Flat;
             btnDeleteExpense.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnDeleteExpense.ForeColor = Color.White;
-            btnDeleteExpense.Location = new Point(574, 113);
+            btnDeleteExpense.Location = new Point(440, 152);
             btnDeleteExpense.Name = "btnDeleteExpense";
             btnDeleteExpense.Size = new Size(280, 33);
             btnDeleteExpense.TabIndex = 13;
@@ -386,7 +405,7 @@
             btnAddExpense.FlatStyle = FlatStyle.Flat;
             btnAddExpense.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddExpense.ForeColor = Color.White;
-            btnAddExpense.Location = new Point(574, 74);
+            btnAddExpense.Location = new Point(587, 74);
             btnAddExpense.Name = "btnAddExpense";
             btnAddExpense.Size = new Size(280, 33);
             btnAddExpense.TabIndex = 12;
@@ -399,7 +418,7 @@
             txtExpenseAmount.Anchor = AnchorStyles.Top;
             txtExpenseAmount.BorderStyle = BorderStyle.FixedSingle;
             txtExpenseAmount.Font = new Font("Segoe UI", 14.25F);
-            txtExpenseAmount.Location = new Point(281, 113);
+            txtExpenseAmount.Location = new Point(294, 113);
             txtExpenseAmount.Name = "txtExpenseAmount";
             txtExpenseAmount.PlaceholderText = "Harcama Tutarı";
             txtExpenseAmount.Size = new Size(280, 33);
@@ -411,7 +430,7 @@
             txtExpenseTitle.Anchor = AnchorStyles.Top;
             txtExpenseTitle.BorderStyle = BorderStyle.FixedSingle;
             txtExpenseTitle.Font = new Font("Segoe UI", 14.25F);
-            txtExpenseTitle.Location = new Point(281, 74);
+            txtExpenseTitle.Location = new Point(294, 74);
             txtExpenseTitle.Name = "txtExpenseTitle";
             txtExpenseTitle.PlaceholderText = "Harcama Adı";
             txtExpenseTitle.Size = new Size(280, 33);
@@ -449,9 +468,11 @@
             dgvExpenses.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvExpenses.Size = new Size(1159, 493);
             dgvExpenses.TabIndex = 0;
+            dgvExpenses.CellClick += dgvExpenses_CellClick;
             // 
             // tabPage3
             // 
+            tabPage3.Controls.Add(btnUpdatePersonnel);
             tabPage3.Controls.Add(txtPerUcret);
             tabPage3.Controls.Add(btnDeletePersonnel);
             tabPage3.Controls.Add(btnAddPersonnel);
@@ -466,12 +487,29 @@
             tabPage3.Text = "tabPage3";
             tabPage3.UseVisualStyleBackColor = true;
             // 
+            // btnUpdatePersonnel
+            // 
+            btnUpdatePersonnel.Anchor = AnchorStyles.Top;
+            btnUpdatePersonnel.BackColor = Color.SteelBlue;
+            btnUpdatePersonnel.Cursor = Cursors.Hand;
+            btnUpdatePersonnel.FlatAppearance.BorderSize = 0;
+            btnUpdatePersonnel.FlatStyle = FlatStyle.Flat;
+            btnUpdatePersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnUpdatePersonnel.ForeColor = Color.White;
+            btnUpdatePersonnel.Location = new Point(591, 115);
+            btnUpdatePersonnel.Name = "btnUpdatePersonnel";
+            btnUpdatePersonnel.Size = new Size(280, 33);
+            btnUpdatePersonnel.TabIndex = 21;
+            btnUpdatePersonnel.Text = "Personeli Güncelle";
+            btnUpdatePersonnel.UseVisualStyleBackColor = false;
+            btnUpdatePersonnel.Click += btnUpdatePersonnel_Click;
+            // 
             // txtPerUcret
             // 
             txtPerUcret.Anchor = AnchorStyles.Top;
             txtPerUcret.BorderStyle = BorderStyle.FixedSingle;
             txtPerUcret.Font = new Font("Segoe UI", 14.25F);
-            txtPerUcret.Location = new Point(280, 115);
+            txtPerUcret.Location = new Point(289, 154);
             txtPerUcret.Name = "txtPerUcret";
             txtPerUcret.PlaceholderText = "Saatlik Ücreti";
             txtPerUcret.Size = new Size(280, 33);
@@ -487,7 +525,7 @@
             btnDeletePersonnel.FlatStyle = FlatStyle.Flat;
             btnDeletePersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnDeletePersonnel.ForeColor = Color.White;
-            btnDeletePersonnel.Location = new Point(573, 76);
+            btnDeletePersonnel.Location = new Point(591, 153);
             btnDeletePersonnel.Name = "btnDeletePersonnel";
             btnDeletePersonnel.Size = new Size(280, 33);
             btnDeletePersonnel.TabIndex = 19;
@@ -504,7 +542,7 @@
             btnAddPersonnel.FlatStyle = FlatStyle.Flat;
             btnAddPersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddPersonnel.ForeColor = Color.White;
-            btnAddPersonnel.Location = new Point(573, 37);
+            btnAddPersonnel.Location = new Point(591, 75);
             btnAddPersonnel.Name = "btnAddPersonnel";
             btnAddPersonnel.Size = new Size(280, 33);
             btnAddPersonnel.TabIndex = 18;
@@ -517,7 +555,7 @@
             txtPerDepartman.Anchor = AnchorStyles.Top;
             txtPerDepartman.BorderStyle = BorderStyle.FixedSingle;
             txtPerDepartman.Font = new Font("Segoe UI", 14.25F);
-            txtPerDepartman.Location = new Point(280, 76);
+            txtPerDepartman.Location = new Point(289, 115);
             txtPerDepartman.Name = "txtPerDepartman";
             txtPerDepartman.PlaceholderText = "Personel Departmanı";
             txtPerDepartman.Size = new Size(280, 33);
@@ -529,7 +567,7 @@
             txtPerAd.Anchor = AnchorStyles.Top;
             txtPerAd.BorderStyle = BorderStyle.FixedSingle;
             txtPerAd.Font = new Font("Segoe UI", 14.25F);
-            txtPerAd.Location = new Point(280, 37);
+            txtPerAd.Location = new Point(289, 76);
             txtPerAd.Name = "txtPerAd";
             txtPerAd.PlaceholderText = "Personel Adı";
             txtPerAd.Size = new Size(280, 33);
@@ -545,12 +583,13 @@
             button3.FlatStyle = FlatStyle.Flat;
             button3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             button3.ForeColor = Color.White;
-            button3.Location = new Point(933, 250);
+            button3.Location = new Point(934, 288);
             button3.Name = "button3";
             button3.Size = new Size(219, 33);
             button3.TabIndex = 15;
             button3.Text = "Excel Olarak Aktar";
             button3.UseVisualStyleBackColor = false;
+            button3.Click += button3_Click;
             // 
             // dgvPersonel
             // 
@@ -560,23 +599,48 @@
             dgvPersonel.BorderStyle = BorderStyle.None;
             dgvPersonel.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
             dgvPersonel.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPersonel.Location = new Point(1, 299);
+            dgvPersonel.Location = new Point(0, 336);
             dgvPersonel.Name = "dgvPersonel";
             dgvPersonel.RowHeadersVisible = false;
             dgvPersonel.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvPersonel.Size = new Size(1159, 493);
             dgvPersonel.TabIndex = 14;
+            dgvPersonel.CellClick += dgvPersonel_CellClick;
             // 
             // tabPage4
             // 
+            tabPage4.Controls.Add(roundedPanel3);
             tabPage4.Controls.Add(panel7);
-            tabPage4.Controls.Add(panel6);
             tabPage4.Location = new Point(4, 24);
             tabPage4.Name = "tabPage4";
             tabPage4.Size = new Size(1161, 829);
             tabPage4.TabIndex = 3;
             tabPage4.Text = "tabPage4";
             tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // roundedPanel3
+            // 
+            roundedPanel3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            roundedPanel3.BackColor = Color.DarkSlateBlue;
+            roundedPanel3.Controls.Add(lblSonuc);
+            roundedPanel3.Location = new Point(313, 382);
+            roundedPanel3.Name = "roundedPanel3";
+            roundedPanel3.Size = new Size(538, 395);
+            roundedPanel3.TabIndex = 11;
+            // 
+            // lblSonuc
+            // 
+            lblSonuc.Anchor = AnchorStyles.Top;
+            lblSonuc.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblSonuc.ForeColor = Color.White;
+            lblSonuc.ImageAlign = ContentAlignment.TopRight;
+            lblSonuc.Location = new Point(5, 11);
+            lblSonuc.Name = "lblSonuc";
+            lblSonuc.Size = new Size(530, 374);
+            lblSonuc.TabIndex = 2;
+            lblSonuc.Text = "--- EFOR MALİYETİ ANALİZ RAPORU ---";
+            lblSonuc.TextAlign = ContentAlignment.TopCenter;
+            lblSonuc.Click += lblResult_Click;
             // 
             // panel7
             // 
@@ -622,7 +686,7 @@
             btnCalculate.FlatStyle = FlatStyle.Flat;
             btnCalculate.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnCalculate.ForeColor = Color.White;
-            btnCalculate.Location = new Point(427, 216);
+            btnCalculate.Location = new Point(438, 217);
             btnCalculate.Name = "btnCalculate";
             btnCalculate.Size = new Size(280, 33);
             btnCalculate.TabIndex = 8;
@@ -635,7 +699,7 @@
             txtBoxB.Anchor = AnchorStyles.Top;
             txtBoxB.BorderStyle = BorderStyle.FixedSingle;
             txtBoxB.Font = new Font("Segoe UI", 14.25F);
-            txtBoxB.Location = new Point(427, 158);
+            txtBoxB.Location = new Point(438, 159);
             txtBoxB.Name = "txtBoxB";
             txtBoxB.PlaceholderText = " Maliyeti (Örn: 50000)";
             txtBoxB.Size = new Size(280, 33);
@@ -647,44 +711,12 @@
             txtBoxA.Anchor = AnchorStyles.Top;
             txtBoxA.BorderStyle = BorderStyle.FixedSingle;
             txtBoxA.Font = new Font("Segoe UI", 14.25F);
-            txtBoxA.Location = new Point(427, 110);
+            txtBoxA.Location = new Point(440, 111);
             txtBoxA.Name = "txtBoxA";
             txtBoxA.PlaceholderText = " Yatırım Adı (Örn: Yeni Sunucu)";
             txtBoxA.Size = new Size(280, 33);
             txtBoxA.TabIndex = 5;
             txtBoxA.TextAlign = HorizontalAlignment.Center;
-            // 
-            // panel6
-            // 
-            panel6.BackColor = Color.DarkSlateBlue;
-            panel6.Controls.Add(flowLayoutPanel1);
-            panel6.Controls.Add(lblSonuc);
-            panel6.Dock = DockStyle.Bottom;
-            panel6.Location = new Point(0, 332);
-            panel6.Name = "panel6";
-            panel6.Size = new Size(1161, 497);
-            panel6.TabIndex = 7;
-            // 
-            // flowLayoutPanel1
-            // 
-            flowLayoutPanel1.Location = new Point(0, 0);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(200, 100);
-            flowLayoutPanel1.TabIndex = 3;
-            // 
-            // lblSonuc
-            // 
-            lblSonuc.Anchor = AnchorStyles.Top;
-            lblSonuc.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblSonuc.ForeColor = Color.White;
-            lblSonuc.ImageAlign = ContentAlignment.TopRight;
-            lblSonuc.Location = new Point(133, 16);
-            lblSonuc.Name = "lblSonuc";
-            lblSonuc.Size = new Size(887, 552);
-            lblSonuc.TabIndex = 2;
-            lblSonuc.Text = "--- EFOR MALİYETİ ANALİZ RAPORU ---";
-            lblSonuc.TextAlign = ContentAlignment.TopCenter;
-            lblSonuc.Click += lblResult_Click;
             // 
             // FormMain
             // 
@@ -715,11 +747,11 @@
             tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPersonel).EndInit();
             tabPage4.ResumeLayout(false);
+            roundedPanel3.ResumeLayout(false);
             panel7.ResumeLayout(false);
             panel7.PerformLayout();
             roundedPanel1.ResumeLayout(false);
             roundedPanel1.PerformLayout();
-            panel6.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -752,7 +784,6 @@
         private Label label5;
         private TextBox txtBoxB;
         private TextBox txtBoxA;
-        private Panel panel6;
         private Button btnCalculate;
         private Label label6;
         private Panel panel7;
@@ -761,7 +792,6 @@
         private TextBox txtExpenseTitle;
         private Button btnDeleteExpense;
         private Button btnAddExpense;
-        private FlowLayoutPanel flowLayoutPanel1;
         private RoundedPanel roundedPanel1;
         private TextBox txtPerUcret;
         private Button btnDeletePersonnel;
@@ -770,5 +800,8 @@
         private TextBox txtPerAd;
         private Button button3;
         private DataGridView dgvPersonel;
+        private RoundedPanel roundedPanel3;
+        private Button btnUpdatePersonnel;
+        private Button btnUpdateExpense;
     }
 }

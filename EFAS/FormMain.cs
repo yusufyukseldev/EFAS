@@ -288,6 +288,28 @@ namespace EFAS
                 // 5. BÜYÜK HESAPLAMA (Maliyet / Ortalama Saatlik Ücret)
                 double gerekenSaat = hedefMaliyet / ortalamaSaatlikUcret;
 
+                // --- AKILLI ZAMAN ÇEVİRİSİ MOTORU ---
+                string zamanMetni = "";
+
+                if (gerekenSaat < 1)
+                {
+                    // 1 saatten az ise: 60 ile çarpıp dakikaya çeviriyoruz
+                    double dakika = Math.Round(gerekenSaat * 60, 0);
+                    zamanMetni = $"{dakika} DAKİKA";
+                }
+                else if (gerekenSaat > 24)
+                {
+                    // 24 saatten fazla ise: Günde 8 saatlik mesai üzerinden "İş Gününe" çeviriyoruz
+                    double gun = Math.Round(gerekenSaat / 8, 1);
+                    zamanMetni = $"{gun} İŞ GÜNÜ";
+                }
+                else
+                {
+                    // Normal saat aralığındaysa
+                    zamanMetni = $"{Math.Round(gerekenSaat, 1)} SAAT";
+                }
+                // ------------------------------------
+
                 // 6. Sonucu ve formülü hocanın şak diye anlayacağı rapor formatında yazdırıyoruz
                 lblSonuc.Text = $"--- EFOR MALİYETİ ANALİZ RAPORU ---\n\n" +
                                 $"Hedeflenen Yatırım: {yatirimAdi}\n" +
@@ -296,7 +318,7 @@ namespace EFAS
                                 $"--------------------------------------------------\n" +
                                 $"📌 SONUÇ: ({hedefMaliyet.ToString("N0")} ₺ / {Math.Round(ortalamaSaatlikUcret, 1)} ₺)\n\n" +
                                 $"Bu yatırımın maliyetini amorti etmek için ekibinizin\n" +
-                                $"toplam {Math.Round(gerekenSaat, 1)} SAAT efor üretmesi gerekmektedir.";
+                                $"toplam {zamanMetni} efor üretmesi gerekmektedir.";
             }
         }
 
@@ -311,6 +333,7 @@ namespace EFAS
             LoadAnalysisData();
             LoadExpenses();
             LoadDashboardStats();
+            LoadPersonnels();
         }
 
         private void btnDeleteExpense_Click_1(object sender, EventArgs e)
@@ -490,6 +513,184 @@ namespace EFAS
         private void label6_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            // 1. Tabloda dışa aktarılacak veri var mı diye kontrol ediyoruz
+            if (dgvPersonel.Rows.Count == 0)
+            {
+                MessageBox.Show("Dışa aktarılacak personel kaydı bulunamadı!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 2. Kullanıcıya dosyayı nereye kaydetmek istediğini soran pencereyi açıyoruz
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Excel Uyumlu Dosya (*.csv)|*.csv";
+            sfd.FileName = "Personel_Listesi.csv";
+            sfd.Title = "Personel Listesini Kaydet";
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // 3. TÜRKÇE KARAKTER KALKANI: System.Text.UTF8Encoding(true) sayesinde İ, Ş, Ğ gibi harfler bozulmaz!
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(sfd.FileName, false, new System.Text.UTF8Encoding(true)))
+                    {
+                        // Başlıkları yazdır (Aralarına noktalı virgül koyarak Excel'in sütunları anlamasını sağlıyoruz)
+                        for (int i = 0; i < dgvPersonel.Columns.Count; i++)
+                        {
+                            sw.Write(dgvPersonel.Columns[i].HeaderText);
+                            if (i < dgvPersonel.Columns.Count - 1)
+                                sw.Write(";");
+                        }
+                        sw.WriteLine();
+
+                        // Verileri yazdır
+                        foreach (DataGridViewRow row in dgvPersonel.Rows)
+                        {
+                            for (int i = 0; i < dgvPersonel.Columns.Count; i++)
+                            {
+                                if (!row.IsNewRow)
+                                {
+                                    // Eğer verinin içinde noktalı virgül varsa Excel'i bozmasın diye temizliyoruz
+                                    string cellValue = row.Cells[i].Value?.ToString().Replace(";", "") ?? "";
+                                    sw.Write(cellValue);
+
+                                    if (i < dgvPersonel.Columns.Count - 1)
+                                        sw.Write(";");
+                                }
+                            }
+                            sw.WriteLine();
+                        }
+                    }
+
+                    MessageBox.Show("Personel listesi başarıyla Excel formatında kaydedildi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    // Eğer dosya o sırada Excel'de açıksa ve sistem üstüne yazamıyorsa çökmemesi için hata yakalama
+                    MessageBox.Show("Aktarım sırasında bir hata oluştu. Lütfen dosyanın açık olmadığından emin olun.\n\nHata: " + ex.Message, "Kayıt Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void dgvPersonel_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Boşluğa veya başlığa tıklandıysa hata vermesini engelle
+            if (e.RowIndex >= 0 && dgvPersonel.CurrentRow != null)
+            {
+                // Tıklanan satırdaki verileri alıp yukarıdaki kutulara dolduruyoruz
+                txtPerAd.Text = dgvPersonel.CurrentRow.Cells["Ad Soyad"].Value.ToString();
+                txtPerDepartman.Text = dgvPersonel.CurrentRow.Cells["Departman"].Value?.ToString() ?? "";
+                txtPerUcret.Text = dgvPersonel.CurrentRow.Cells["Saatlik Ücret (TL)"].Value.ToString();
+            }
+        }
+
+        private void btnUpdatePersonnel_Click(object sender, EventArgs e)
+        {
+            // 1. Tablodan biri seçili mi kontrol et
+            if (dgvPersonel.CurrentRow == null)
+            {
+                MessageBox.Show("Lütfen güncellemek için önce tablodan bir personel seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 2. Kutular boş mu kontrol et
+            if (string.IsNullOrWhiteSpace(txtPerAd.Text) || string.IsNullOrWhiteSpace(txtPerUcret.Text))
+            {
+                MessageBox.Show("Ad Soyad ve Saatlik Ücret alanları boş bırakılamaz!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // 3. Ücret kısmına harf girilmesini engelle
+            if (!double.TryParse(txtPerUcret.Text, out double safeUcret))
+            {
+                MessageBox.Show("Lütfen ücret kısmına sadece rakam giriniz!", "Hatalı Giriş", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 4. Seçili olan personelin ID'sini arka plandan (gizli sütundan) al
+            int selectedId = Convert.ToInt32(dgvPersonel.CurrentRow.Cells["Id"].Value);
+
+            // 5. Veritabanını Güncelle (UPDATE)
+            using (var connection = DbHelper.GetConnection())
+            {
+                string query = "UPDATE Personnels SET FullName = @FullName, Department = @Department, HourlyRate = @HourlyRate WHERE Id = @Id";
+
+                connection.Execute(query, new
+                {
+                    FullName = txtPerAd.Text,
+                    Department = txtPerDepartman.Text,
+                    HourlyRate = safeUcret,
+                    Id = selectedId
+                });
+
+                MessageBox.Show("Personel bilgileri başarıyla güncellendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Kutuları temizle ve tabloyu yenile
+                txtPerAd.Clear();
+                txtPerDepartman.Clear();
+                txtPerUcret.Clear();
+                LoadPersonnels();
+            }
+        }
+
+        private void dgvExpenses_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Boşluğa tıklandıysa hata verme
+            if (e.RowIndex >= 0 && dgvExpenses.CurrentRow != null)
+            {
+                // Tıklanan satırdaki verileri Gider kutularına doldur
+                txtExpenseTitle.Text = dgvExpenses.CurrentRow.Cells["Harcama Kalemi"].Value.ToString();
+                txtExpenseAmount.Text = dgvExpenses.CurrentRow.Cells["Tutar (TL)"].Value.ToString();
+            }
+        }
+
+        private void btnUpdateExpense_Click(object sender, EventArgs e)
+        {
+            // 1. Seçim ve Boş Kutu Kontrolleri
+            if (dgvExpenses.CurrentRow == null)
+            {
+                MessageBox.Show("Lütfen güncellemek için tablodan bir harcama seçin!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtExpenseTitle.Text) || string.IsNullOrWhiteSpace(txtExpenseAmount.Text))
+            {
+                MessageBox.Show("Harcama Adı ve Tutarı boş bırakılamaz!", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!double.TryParse(txtExpenseAmount.Text, out double safeTutar))
+            {
+                MessageBox.Show("Lütfen tutar kısmına geçerli bir rakam giriniz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 2. Arka plandan seçili harcamanın ID'sini al
+            int selectedId = Convert.ToInt32(dgvExpenses.CurrentRow.Cells["Id"].Value);
+
+            // 3. Veritabanında Güncelle (UPDATE)
+            using (var connection = DbHelper.GetConnection())
+            {
+                // Tarihi değiştirmiyoruz, sadece adı ve tutarı güncelliyoruz
+                string query = "UPDATE Expenses SET Title = @Title, Amount = @Amount WHERE Id = @Id";
+
+                connection.Execute(query, new
+                {
+                    Title = txtExpenseTitle.Text,
+                    Amount = safeTutar,
+                    Id = selectedId
+                });
+
+                MessageBox.Show("Harcama kaydı başarıyla güncellendi!", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Ekranı temizle ve tabloyu yenile
+                txtExpenseTitle.Clear();
+                txtExpenseAmount.Clear();
+                LoadExpenses();
+            }
         }
     }
 
