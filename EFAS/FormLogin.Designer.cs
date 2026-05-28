@@ -120,11 +120,11 @@
             // 
             label5.AutoSize = true;
             label5.Cursor = Cursors.Hand;
-            label5.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label5.ForeColor = Color.LightGray;
+            label5.Font = new Font("Segoe UI Semibold", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label5.ForeColor = Color.White;
             label5.Location = new Point(276, 0);
             label5.Name = "label5";
-            label5.Size = new Size(27, 30);
+            label5.Size = new Size(26, 30);
             label5.TabIndex = 6;
             label5.Text = "X";
             label5.Click += label5_Click;

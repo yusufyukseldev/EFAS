@@ -32,63 +32,85 @@ namespace EFAS
 
             txtExpenseTitle.PlaceholderText = "Harcama Adı";
             txtExpenseAmount.PlaceholderText = "Harcama Tutarı";
+            LoadDashboardStats();
+        }
+        private void LoadDashboardStats()
+        {
+            using (var connection = DbHelper.GetConnection())
+            {
+                // 1. Sistemdeki toplam çalışan sayısını saydırıyoruz
+                int totalUsers = connection.QueryFirstOrDefault<int>("SELECT COUNT(Id) FROM Users");
+                lblTotalPersonnel.Text = totalUsers.ToString() + " Kişi";
+
+                // 2. Şirketin o ana kadarki toplam masrafını toplatıyoruz (Veri yoksa hata vermemesi için Null kontrolü ekledik)
+                double totalExpense = connection.QueryFirstOrDefault<double?>("SELECT SUM(Amount) FROM Expenses") ?? 0;
+                // "C0" formatı sayının sonuna otomatik TL simgesi ve binlik ayıracı (nokta) koyar
+                lblTotalExpense.Text = totalExpense.ToString("N0") + " ₺";
+
+                // 3. Şirketteki tüm personelin saatlik efor maliyetinin ortalamasını alıyoruz
+                double avgRate = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Users WHERE HourlyRate > 0") ?? 0;
+                lblAvgCost.Text = Math.Round(avgRate, 1).ToString() + " ₺ / Saat";
+            }
         }
         private void LoadDashboardChart()
         {
-            // 1. Grafiği temizle ve sıfırdan oluştur
             panelChart.Controls.Clear();
             LiveCharts.WinForms.CartesianChart myChart = new LiveCharts.WinForms.CartesianChart();
             myChart.Dock = DockStyle.Fill;
             panelChart.Controls.Add(myChart);
 
-            // 2. Verileri Veritabanından Çek
             using (var connection = DbHelper.GetConnection())
             {
-                // Giderler tablosundaki kalemleri çekiyoruz
                 var expenses = connection.Query("SELECT Title, Amount FROM Expenses").AsList();
 
-                // ŞİMDİLİK TEST İÇİN: Eğer veritabanı boşsa sahte veriler ekleyelim ki grafiği görebilelim
-                if (expenses.Count == 0)
+                var labels = new List<string>();
+                var values = new LiveCharts.ChartValues<double>();
+
+                foreach (var expense in expenses)
                 {
-                    expenses.Add(new { Title = "Sunucu Kirası", Amount = 1500.0 });
-                    expenses.Add(new { Title = "Reklam Bütçesi", Amount = 3200.0 });
-                    expenses.Add(new { Title = "Ofis Gideri", Amount = 800.0 });
-                    expenses.Add(new { Title = "Scooter Bakım", Amount = 1200.0 });
+                    labels.Add((string)expense.Title);
+                    values.Add(Convert.ToDouble(expense.Amount));
                 }
 
-                // 3. Grafiğe Verileri Basma Hazırlığı
-                ChartValues<double> values = new ChartValues<double>();
-                List<string> labels = new List<string>();
+                // Tavan boşluğu için dizideki en yüksek harcamayı buluyoruz (Liste boşsa 1000 baz alınır)
+                double maxAmount = values.Count > 0 ? values.Max() : 1000;
 
-                foreach (var item in expenses)
+                var columnSeries = new LiveCharts.Wpf.ColumnSeries
                 {
-                    values.Add(Convert.ToDouble(item.Amount));
-                    labels.Add(item.Title.ToString());
-                }
-
-                // 4. Grafiği Şekillendirme
-                myChart.Series = new SeriesCollection
-                {
-                    new ColumnSeries
-                    {
-                        Title = "Tutar (TL)",
-                        Values = values
-                    }
+                    Title = "Gider Tutarı",
+                    Values = values,
+                    DataLabels = true,
+                    MaxColumnWidth = 60,
+                    Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(60, 179, 113)),
+                    // Çubukların tepesinde yazan rakamları (Örn: 20000) daha koyu ve belirgin yaptık
+                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 30, 30))
                 };
 
-                // X Ekseni (Alt Taraf - İsimler)
-                myChart.AxisX.Add(new Axis
+                myChart.Series.Add(columnSeries);
+
+                // ==========================================
+                // ALT EKSEN (Harcama Kalemleri - Daha Büyük Yazı)
+                // ==========================================
+                myChart.AxisX.Add(new LiveCharts.Wpf.Axis
                 {
                     Title = "Harcama Kalemleri",
                     Labels = labels,
-                    Separator = new Separator { Step = 1, IsEnabled = false }
+                    Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false },
+                    FontSize = 14, // Yazıları büyüttük
+                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 40, 40)) // Silik griden koyu, tok bir renge geçtik
                 });
 
-                // Y Ekseni (Sol Taraf - Sayılar)
-                myChart.AxisY.Add(new Axis
+                // ==========================================
+                // SOL EKSEN (Maliyet - Tavan Boşluğu Eklendi)
+                // ==========================================
+                myChart.AxisY.Add(new LiveCharts.Wpf.Axis
                 {
-                    Title = "Maliyet",
-                    LabelFormatter = value => value.ToString("C") // Rakamları TL formatında gösterir
+                    Title = "Maliyet (TL)",
+                    LabelFormatter = value => value.ToString("N0") + " ₺",
+                    MinValue = 0,
+                    MaxValue = maxAmount * 1.2, // İŞTE SİHİR BURADA: Tavanı %20 oranında yukarı çekerek grafiğe nefes aldırır
+                    FontSize = 13, // Yazıları büyüttük
+                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 40, 40))
                 });
             }
         }
@@ -108,9 +130,7 @@ namespace EFAS
                     expenses.Add(new ExpenseModel { Id = 3, Title = "Yeni Kask (ECE Sertifikalı)", Amount = 4500 });
                 }
 
-                comboBoxExpenses.DataSource = expenses;
-                comboBoxExpenses.DisplayMember = "DisplayText"; // Ekranda görünen yazı
-                comboBoxExpenses.ValueMember = "Amount";        // Arka planda tutulan sayısal değer
+             
             }
         }
 
@@ -186,6 +206,7 @@ namespace EFAS
                 LoadExpenses();
                 LoadDashboardChart();
                 LoadAnalysisData();
+                LoadDashboardStats();
             }
         }
 
@@ -208,30 +229,7 @@ namespace EFAS
                 LoadExpenses();
                 LoadDashboardChart();
                 LoadAnalysisData();
-            }
-        }
-
-        private void btnCalculate_Click_1(object sender, EventArgs e)
-        {
-            if (comboBoxExpenses.SelectedItem == null) return;
-
-            // ComboBox'tan seçilen harcamanın tutarını al (Örn: 1500)
-            double expenseAmount = Convert.ToDouble(comboBoxExpenses.SelectedValue);
-
-            using (var connection = DbHelper.GetConnection())
-            {
-                // Sistemdeki admin'in saatlik kazancını veritabanından çek (500 TL olarak girmiştik)
-                double hourlyRate = connection.QueryFirstOrDefault<double>("SELECT HourlyRate FROM Users WHERE Username = 'admin'");
-
-                if (hourlyRate > 0)
-                {
-                    // Sihirli formül: Harcama / Saatlik Ücret
-                    double hoursNeeded = expenseAmount / hourlyRate;
-
-                    // Sonucu ekrandaki büyük Label'a yazdır
-                    lblResult.Text = $"Bu harcamayı amorti etmek için tam\n{Math.Round(hoursNeeded, 1)} SAAT\nçalışmanız gerekmektedir!";
-                    lblResult.ForeColor = Color.DarkRed; // Rengi dramatik olsun diye kırmızı yapıyoruz
-                }
+                LoadDashboardStats();
             }
         }
 
@@ -260,6 +258,55 @@ namespace EFAS
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblResult_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCalculate_Click(object sender, EventArgs e)
+        {
+            // 1. Kutudaki maliyeti (txtBoxB) rakam olarak almayı deniyoruz
+            if (!double.TryParse(txtBoxB.Text, out double hedefMaliyet))
+            {
+                MessageBox.Show("Lütfen maliyet kısmına geçerli bir rakam (Örn: 50000) giriniz!", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // 2. Kutudaki yatırım adını (txtBoxA) alıyoruz
+            string yatirimAdi = txtBoxA.Text;
+
+            using (var connection = DbHelper.GetConnection())
+            {
+                // 3. Veritabanına bağlanıp personelin "Ortalama Saatlik Ücretini" buluyoruz
+                double ortalamaSaatlikUcret = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Users WHERE HourlyRate > 0") ?? 0;
+
+                // 4. Eğer sistemde hiç saatlik ücreti olan personel yoksa uyaralım
+                if (ortalamaSaatlikUcret == 0)
+                {
+                    MessageBox.Show("Sistemde saatlik ücreti girilmiş aktif personel bulunamadı. Lütfen 'Personel' sekmesinden çalışan ekleyin.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 5. BÜYÜK HESAPLAMA (Maliyet / Ortalama Saatlik Ücret)
+                double gerekenSaat = hedefMaliyet / ortalamaSaatlikUcret;
+
+                // 6. Sonucu ve formülü hocanın şak diye anlayacağı rapor formatında yazdırıyoruz
+                lblSonuc.Text = $"--- EFOR MALİYETİ ANALİZ RAPORU ---\n\n" +
+                                $"Hedeflenen Yatırım: {yatirimAdi}\n" +
+                                $"Yatırım Bedeli: {hedefMaliyet.ToString("N0")} ₺\n" +
+                                $"Şirket Ort. Personel Maliyeti: {Math.Round(ortalamaSaatlikUcret, 1)} ₺ / Saat\n" +
+                                $"--------------------------------------------------\n" +
+                                $"📌 SONUÇ: ({hedefMaliyet.ToString("N0")} ₺ / {Math.Round(ortalamaSaatlikUcret, 1)} ₺)\n\n" +
+                                $"Bu yatırımın maliyetini amorti etmek için ekibinizin\n" +
+                                $"toplam {Math.Round(gerekenSaat, 1)} SAAT efor üretmesi gerekmektedir.";
+            }
         }
     }
     // Bu sınıf, harcamaları ComboBox'ta "İsim (Tutar TL)" şeklinde şık göstermemizi sağlayacak
