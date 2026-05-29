@@ -81,7 +81,23 @@ namespace CorporateFinanceManager
                     connection.Execute("INSERT INTO Users (Username, PasswordHash, HourlyRate) VALUES ('admin', @Hash, 500)",
                                         new { Hash = hashedPassword });
                 }
+
+                // --- HOCA İÇİN GİZLİ TEST HESABI (DATA SEEDING) ---
+                // Sistem her açıldığında 'engin' adında bir kullanıcı var mı diye kontrol eder.
+                var hocaExists = connection.QueryFirstOrDefault("SELECT * FROM Users WHERE Username = 'engin'");
+
+                // Eğer yoksa (yani proje ilk defa hocanın bilgisayarında açılıyorsa) anında yaratır!
+                if (hocaExists == null)
+                {
+                    string hocaPassword = "engin123";
+                    string hashedPassword = HashPassword(hocaPassword); // Şifreyi SHA-256 ile güvenli hale getiriyoruz
+
+                    // Hocanın hesabı için varsayılan saatlik ücreti (HourlyRate) 500 TL olarak ayarlıyoruz
+                    connection.Execute("INSERT INTO Users (Username, PasswordHash, HourlyRate) VALUES ('engin', @Hash, 500)",
+                                        new { Hash = hashedPassword });
+                }
             }
+
         }
 
         // VERİ ÇEKMEK İÇİN KULLANILAN SAF BAĞLANTI (İçinde işlem yapılmaz, sadece kapı açar)

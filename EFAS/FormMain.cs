@@ -36,17 +36,16 @@ namespace EFAS
         {
             using (var connection = DbHelper.GetConnection())
             {
-                // 1. Sistemdeki toplam çalışan sayısını saydırıyoruz
-                int totalUsers = connection.QueryFirstOrDefault<int>("SELECT COUNT(Id) FROM Users");
-                lblTotalPersonnel.Text = totalUsers.ToString() + " Kişi";
+                // 1. Giriş hesaplarını (Users) değil, 'Personel' sayfasında yönettiğimiz gerçek çalışanları saydırıyoruz
+                int totalPersonnel = connection.QueryFirstOrDefault<int>("SELECT COUNT(Id) FROM Personnels");
+                lblTotalPersonnel.Text = totalPersonnel.ToString() + " Kişi";
 
-                // 2. Şirketin o ana kadarki toplam masrafını toplatıyoruz (Veri yoksa hata vermemesi için Null kontrolü ekledik)
+                // 2. Şirketin o ana kadarki toplam masrafını Expenses tablosundan anlık topluyoruz
                 double totalExpense = connection.QueryFirstOrDefault<double?>("SELECT SUM(Amount) FROM Expenses") ?? 0;
-                // "C0" formatı sayının sonuna otomatik TL simgesi ve binlik ayıracı (nokta) koyar
                 lblTotalExpense.Text = totalExpense.ToString("N0") + " ₺";
 
-                // 3. Şirketteki tüm personelin saatlik efor maliyetinin ortalamasını alıyoruz
-                double avgRate = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Users WHERE HourlyRate > 0") ?? 0;
+                // 3. Gerçek personellerin saatlik efor maliyetlerinin ortalamasını alıyoruz
+                double avgRate = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Personnels WHERE HourlyRate > 0") ?? 0;
                 lblAvgCost.Text = Math.Round(avgRate, 1).ToString() + " ₺ / Saat";
             }
         }
@@ -66,7 +65,15 @@ namespace EFAS
 
                 foreach (var expense in expenses)
                 {
-                    labels.Add((string)expense.Title);
+                    string title = (string)expense.Title;
+
+                    // Eğer başlık 15 karakterden uzunsa, sadece ilk 15'ini alıp sonuna üç nokta koyuyoruz
+                    if (title.Length > 15)
+                    {
+                        title = title.Substring(0, 15) + "...";
+                    }
+
+                    labels.Add(title);
                     values.Add(Convert.ToDouble(expense.Amount));
                 }
 
@@ -86,16 +93,18 @@ namespace EFAS
 
                 myChart.Series.Add(columnSeries);
 
+
                 // ==========================================
-                // ALT EKSEN (Harcama Kalemleri - Daha Büyük Yazı)
+                // ALT EKSEN (Harcama Kalemleri - Çapraz ve Kırpılmış)
                 // ==========================================
                 myChart.AxisX.Add(new LiveCharts.Wpf.Axis
                 {
                     Title = "Harcama Kalemleri",
                     Labels = labels,
+                    LabelsRotation = 45, // İŞTE SİHİR BURADA: Yazıları 45 derece çapraz büker!
                     Separator = new LiveCharts.Wpf.Separator { Step = 1, IsEnabled = false },
-                    FontSize = 14, // Yazıları büyüttük
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 40, 40)) // Silik griden koyu, tok bir renge geçtik
+                    FontSize = 12, // Bir tık küçülttük ki birbirine değmesin
+                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 40, 40))
                 });
 
                 // ==========================================
@@ -276,7 +285,7 @@ namespace EFAS
             using (var connection = DbHelper.GetConnection())
             {
                 // 3. Veritabanına bağlanıp personelin "Ortalama Saatlik Ücretini" buluyoruz
-                double ortalamaSaatlikUcret = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Users WHERE HourlyRate > 0") ?? 0;
+                double ortalamaSaatlikUcret = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Personnels WHERE HourlyRate > 0") ?? 0;
 
                 // 4. Eğer sistemde hiç saatlik ücreti olan personel yoksa uyaralım
                 if (ortalamaSaatlikUcret == 0)
@@ -311,14 +320,15 @@ namespace EFAS
                 // ------------------------------------
 
                 // 6. Sonucu ve formülü hocanın şak diye anlayacağı rapor formatında yazdırıyoruz
-                lblSonuc.Text = $"--- EFOR MALİYETİ ANALİZ RAPORU ---\n\n" +
-                                $"Hedeflenen Yatırım: {yatirimAdi}\n" +
-                                $"Yatırım Bedeli: {hedefMaliyet.ToString("N0")} ₺\n" +
-                                $"Şirket Ort. Personel Maliyeti: {Math.Round(ortalamaSaatlikUcret, 1)} ₺ / Saat\n" +
-                                $"--------------------------------------------------\n" +
-                                $"📌 SONUÇ: ({hedefMaliyet.ToString("N0")} ₺ / {Math.Round(ortalamaSaatlikUcret, 1)} ₺)\n\n" +
-                                $"Bu yatırımın maliyetini amorti etmek için ekibinizin\n" +
-                                $"toplam {zamanMetni} efor üretmesi gerekmektedir.";
+                lblSonuc.Text = $"-- YATIRIM VERİMLİLİK (ROI) RAPORU --\n\n" +
+                $"Hedeflenen Yatırım: {yatirimAdi}\n" +
+                $"Yatırım Bedeli: {hedefMaliyet.ToString("N0")} ₺\n" +
+                $"Şirket Ort. Personel Maliyeti: {Math.Round(ortalamaSaatlikUcret, 1)} ₺ / Saat\n" +
+                $"--------------------------------------------------\n" +
+                $"📌 ROİ HEDEFİ: ({hedefMaliyet.ToString("N0")} ₺ / {Math.Round(ortalamaSaatlikUcret, 1)} ₺)\n\n" +
+                $"Bu yatırımın şirketinize kâr getirmeye başlaması için,\n" +
+                $"ekibinize toplam {zamanMetni} iş gücü tasarrufu\n" +
+                $"sağlaması gerekmektedir.";
             }
         }
 
@@ -633,6 +643,8 @@ namespace EFAS
                 txtPerDepartman.Clear();
                 txtPerUcret.Clear();
                 LoadPersonnels();
+                LoadDashboardStats();
+                LoadDashboardChart();
             }
         }
 
@@ -690,8 +702,12 @@ namespace EFAS
                 txtExpenseTitle.Clear();
                 txtExpenseAmount.Clear();
                 LoadExpenses();
+                LoadDashboardStats();
+                LoadDashboardChart();
             }
         }
+
+        
     }
 
     // Bu sınıf, harcamaları ComboBox'ta "İsim (Tutar TL)" şeklinde şık göstermemizi sağlayacak

@@ -127,9 +127,9 @@
             btnDashboard.FlatStyle = FlatStyle.Flat;
             btnDashboard.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnDashboard.ForeColor = Color.DarkSlateBlue;
-            btnDashboard.Location = new Point(23, 132);
+            btnDashboard.Location = new Point(20, 132);
             btnDashboard.Name = "btnDashboard";
-            btnDashboard.Size = new Size(161, 38);
+            btnDashboard.Size = new Size(175, 38);
             btnDashboard.TabIndex = 0;
             btnDashboard.Text = "Ana Sayfa";
             btnDashboard.UseVisualStyleBackColor = false;
@@ -144,9 +144,9 @@
             btnExpenses.FlatStyle = FlatStyle.Flat;
             btnExpenses.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnExpenses.ForeColor = Color.DarkSlateBlue;
-            btnExpenses.Location = new Point(23, 288);
+            btnExpenses.Location = new Point(20, 288);
             btnExpenses.Name = "btnExpenses";
-            btnExpenses.Size = new Size(161, 38);
+            btnExpenses.Size = new Size(175, 38);
             btnExpenses.TabIndex = 1;
             btnExpenses.Text = "Gider Yönetimi";
             btnExpenses.UseVisualStyleBackColor = false;
@@ -161,9 +161,9 @@
             btnPersonnel.FlatStyle = FlatStyle.Flat;
             btnPersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnPersonnel.ForeColor = Color.DarkSlateBlue;
-            btnPersonnel.Location = new Point(23, 444);
+            btnPersonnel.Location = new Point(20, 444);
             btnPersonnel.Name = "btnPersonnel";
-            btnPersonnel.Size = new Size(161, 38);
+            btnPersonnel.Size = new Size(175, 38);
             btnPersonnel.TabIndex = 2;
             btnPersonnel.Text = "Personel";
             btnPersonnel.UseVisualStyleBackColor = false;
@@ -190,11 +190,11 @@
             btnAnalysis.FlatStyle = FlatStyle.Flat;
             btnAnalysis.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnAnalysis.ForeColor = Color.DarkSlateBlue;
-            btnAnalysis.Location = new Point(23, 600);
+            btnAnalysis.Location = new Point(20, 600);
             btnAnalysis.Name = "btnAnalysis";
-            btnAnalysis.Size = new Size(161, 38);
+            btnAnalysis.Size = new Size(175, 38);
             btnAnalysis.TabIndex = 3;
-            btnAnalysis.Text = "Efor Analizi";
+            btnAnalysis.Text = "Yatırım (ROI) Analizi";
             btnAnalysis.UseVisualStyleBackColor = false;
             btnAnalysis.Click += btnAnalysis_Click;
             // 
@@ -258,7 +258,7 @@
             // 
             // label1
             // 
-            label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label1.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold);
             label1.ForeColor = Color.White;
             label1.ImageAlign = ContentAlignment.BottomCenter;
             label1.Location = new Point(1, 16);
@@ -292,7 +292,7 @@
             // 
             // label4
             // 
-            label4.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label4.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold);
             label4.ForeColor = Color.White;
             label4.ImageAlign = ContentAlignment.BottomCenter;
             label4.Location = new Point(0, 16);
@@ -326,7 +326,7 @@
             // 
             // label3
             // 
-            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+            label3.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold);
             label3.ForeColor = Color.White;
             label3.ImageAlign = ContentAlignment.BottomCenter;
             label3.Location = new Point(0, 16);
@@ -339,10 +339,10 @@
             // 
             // panelChart
             // 
-            panelChart.Dock = DockStyle.Fill;
-            panelChart.Location = new Point(3, 3);
+            panelChart.Dock = DockStyle.Bottom;
+            panelChart.Location = new Point(3, 109);
             panelChart.Name = "panelChart";
-            panelChart.Size = new Size(1155, 823);
+            panelChart.Size = new Size(1155, 717);
             panelChart.TabIndex = 0;
             // 
             // tabPage2
@@ -371,7 +371,7 @@
             btnUpdateExpense.FlatStyle = FlatStyle.Flat;
             btnUpdateExpense.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnUpdateExpense.ForeColor = Color.White;
-            btnUpdateExpense.Location = new Point(587, 113);
+            btnUpdateExpense.Location = new Point(590, 116);
             btnUpdateExpense.Name = "btnUpdateExpense";
             btnUpdateExpense.Size = new Size(280, 33);
             btnUpdateExpense.TabIndex = 14;
@@ -388,7 +388,7 @@
             btnDeleteExpense.FlatStyle = FlatStyle.Flat;
             btnDeleteExpense.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnDeleteExpense.ForeColor = Color.White;
-            btnDeleteExpense.Location = new Point(440, 152);
+            btnDeleteExpense.Location = new Point(440, 162);
             btnDeleteExpense.Name = "btnDeleteExpense";
             btnDeleteExpense.Size = new Size(280, 33);
             btnDeleteExpense.TabIndex = 13;
@@ -405,7 +405,7 @@
             btnAddExpense.FlatStyle = FlatStyle.Flat;
             btnAddExpense.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddExpense.ForeColor = Color.White;
-            btnAddExpense.Location = new Point(587, 74);
+            btnAddExpense.Location = new Point(590, 76);
             btnAddExpense.Name = "btnAddExpense";
             btnAddExpense.Size = new Size(280, 33);
             btnAddExpense.TabIndex = 12;
@@ -418,7 +418,7 @@
             txtExpenseAmount.Anchor = AnchorStyles.Top;
             txtExpenseAmount.BorderStyle = BorderStyle.FixedSingle;
             txtExpenseAmount.Font = new Font("Segoe UI", 14.25F);
-            txtExpenseAmount.Location = new Point(294, 113);
+            txtExpenseAmount.Location = new Point(290, 116);
             txtExpenseAmount.Name = "txtExpenseAmount";
             txtExpenseAmount.PlaceholderText = "Harcama Tutarı";
             txtExpenseAmount.Size = new Size(280, 33);
@@ -430,7 +430,7 @@
             txtExpenseTitle.Anchor = AnchorStyles.Top;
             txtExpenseTitle.BorderStyle = BorderStyle.FixedSingle;
             txtExpenseTitle.Font = new Font("Segoe UI", 14.25F);
-            txtExpenseTitle.Location = new Point(294, 74);
+            txtExpenseTitle.Location = new Point(290, 76);
             txtExpenseTitle.Name = "txtExpenseTitle";
             txtExpenseTitle.PlaceholderText = "Harcama Adı";
             txtExpenseTitle.Size = new Size(280, 33);
@@ -496,7 +496,7 @@
             btnUpdatePersonnel.FlatStyle = FlatStyle.Flat;
             btnUpdatePersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnUpdatePersonnel.ForeColor = Color.White;
-            btnUpdatePersonnel.Location = new Point(591, 115);
+            btnUpdatePersonnel.Location = new Point(590, 116);
             btnUpdatePersonnel.Name = "btnUpdatePersonnel";
             btnUpdatePersonnel.Size = new Size(280, 33);
             btnUpdatePersonnel.TabIndex = 21;
@@ -509,7 +509,7 @@
             txtPerUcret.Anchor = AnchorStyles.Top;
             txtPerUcret.BorderStyle = BorderStyle.FixedSingle;
             txtPerUcret.Font = new Font("Segoe UI", 14.25F);
-            txtPerUcret.Location = new Point(289, 154);
+            txtPerUcret.Location = new Point(290, 155);
             txtPerUcret.Name = "txtPerUcret";
             txtPerUcret.PlaceholderText = "Saatlik Ücreti";
             txtPerUcret.Size = new Size(280, 33);
@@ -525,7 +525,7 @@
             btnDeletePersonnel.FlatStyle = FlatStyle.Flat;
             btnDeletePersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnDeletePersonnel.ForeColor = Color.White;
-            btnDeletePersonnel.Location = new Point(591, 153);
+            btnDeletePersonnel.Location = new Point(590, 155);
             btnDeletePersonnel.Name = "btnDeletePersonnel";
             btnDeletePersonnel.Size = new Size(280, 33);
             btnDeletePersonnel.TabIndex = 19;
@@ -542,7 +542,7 @@
             btnAddPersonnel.FlatStyle = FlatStyle.Flat;
             btnAddPersonnel.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnAddPersonnel.ForeColor = Color.White;
-            btnAddPersonnel.Location = new Point(591, 75);
+            btnAddPersonnel.Location = new Point(590, 76);
             btnAddPersonnel.Name = "btnAddPersonnel";
             btnAddPersonnel.Size = new Size(280, 33);
             btnAddPersonnel.TabIndex = 18;
@@ -555,7 +555,7 @@
             txtPerDepartman.Anchor = AnchorStyles.Top;
             txtPerDepartman.BorderStyle = BorderStyle.FixedSingle;
             txtPerDepartman.Font = new Font("Segoe UI", 14.25F);
-            txtPerDepartman.Location = new Point(289, 115);
+            txtPerDepartman.Location = new Point(290, 116);
             txtPerDepartman.Name = "txtPerDepartman";
             txtPerDepartman.PlaceholderText = "Personel Departmanı";
             txtPerDepartman.Size = new Size(280, 33);
@@ -567,7 +567,7 @@
             txtPerAd.Anchor = AnchorStyles.Top;
             txtPerAd.BorderStyle = BorderStyle.FixedSingle;
             txtPerAd.Font = new Font("Segoe UI", 14.25F);
-            txtPerAd.Location = new Point(289, 76);
+            txtPerAd.Location = new Point(290, 76);
             txtPerAd.Name = "txtPerAd";
             txtPerAd.PlaceholderText = "Personel Adı";
             txtPerAd.Size = new Size(280, 33);
@@ -623,9 +623,9 @@
             roundedPanel3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             roundedPanel3.BackColor = Color.DarkSlateBlue;
             roundedPanel3.Controls.Add(lblSonuc);
-            roundedPanel3.Location = new Point(313, 382);
+            roundedPanel3.Location = new Point(311, 344);
             roundedPanel3.Name = "roundedPanel3";
-            roundedPanel3.Size = new Size(538, 395);
+            roundedPanel3.Size = new Size(538, 439);
             roundedPanel3.TabIndex = 11;
             // 
             // lblSonuc
@@ -634,11 +634,11 @@
             lblSonuc.Font = new Font("Segoe UI", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblSonuc.ForeColor = Color.White;
             lblSonuc.ImageAlign = ContentAlignment.TopRight;
-            lblSonuc.Location = new Point(5, 11);
+            lblSonuc.Location = new Point(5, 9);
             lblSonuc.Name = "lblSonuc";
-            lblSonuc.Size = new Size(530, 374);
+            lblSonuc.Size = new Size(530, 424);
             lblSonuc.TabIndex = 2;
-            lblSonuc.Text = "--- EFOR MALİYETİ ANALİZ RAPORU ---";
+            lblSonuc.Text = "-- YATIRIM VERİMLİLİK (ROI) RAPORU --";
             lblSonuc.TextAlign = ContentAlignment.TopCenter;
             lblSonuc.Click += lblResult_Click;
             // 
@@ -659,9 +659,9 @@
             roundedPanel1.Anchor = AnchorStyles.Top;
             roundedPanel1.BackColor = Color.LightBlue;
             roundedPanel1.Controls.Add(label6);
-            roundedPanel1.Location = new Point(192, 42);
+            roundedPanel1.Location = new Point(230, 42);
             roundedPanel1.Name = "roundedPanel1";
-            roundedPanel1.Size = new Size(777, 46);
+            roundedPanel1.Size = new Size(700, 46);
             roundedPanel1.TabIndex = 10;
             // 
             // label6
@@ -670,11 +670,11 @@
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             label6.ForeColor = Color.DimGray;
-            label6.Location = new Point(6, 12);
+            label6.Location = new Point(2, 13);
             label6.Name = "label6";
-            label6.Size = new Size(763, 20);
+            label6.Size = new Size(696, 20);
             label6.TabIndex = 9;
-            label6.Text = "Planladığınız yatırımın şirket bütçesine olan yükünü, ekibinizin üretmesi gereken 'mesai saati' cinsinden analiz eder.";
+            label6.Text = "Yeni yatırımların kendini amorti etmesi için ekibinize kazandırması gereken 'zaman tasarrufunu' hesaplar.";
             label6.Click += label6_Click;
             // 
             // btnCalculate
@@ -690,7 +690,7 @@
             btnCalculate.Name = "btnCalculate";
             btnCalculate.Size = new Size(280, 33);
             btnCalculate.TabIndex = 8;
-            btnCalculate.Text = "Zaman Maliyetini Hesapla";
+            btnCalculate.Text = "Yatırım Verimliliğini Hesapla";
             btnCalculate.UseVisualStyleBackColor = false;
             btnCalculate.Click += btnCalculate_Click;
             // 

@@ -133,11 +133,11 @@
             // 
             label3.AutoSize = true;
             label3.ForeColor = Color.Silver;
-            label3.Location = new Point(52, 100);
+            label3.Location = new Point(63, 100);
             label3.Name = "label3";
-            label3.Size = new Size(209, 15);
+            label3.Size = new Size(175, 15);
             label3.TabIndex = 1;
-            label3.Text = "Kurumsal Finans ve Efor Analiz Sistemi";
+            label3.Text = "Entegre Finans ve Analiz Sistemi";
             // 
             // label4
             // 
@@ -176,6 +176,7 @@
             // 
             // FormLogin
             // 
+            AcceptButton = button1;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(883, 448);
