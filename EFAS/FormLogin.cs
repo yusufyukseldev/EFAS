@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Dapper;
-using CorporateFinanceManager; // DbHelper sınıfımızı tanıması için bunu ekledik
+using CorporateFinanceManager; 
 using System.Runtime.InteropServices;
 
 namespace EFAS
@@ -11,7 +11,7 @@ namespace EFAS
         // Sistem şu an Giriş modunda mı, Kayıt modunda mı onu takip ediyoruz
         bool isRegisterMode = false;
 
-        // Windows'un sürükleme algılayıcılarını projemize dahil ediyoruz
+        // Windows'un sürükleme algılayıcıları
         [DllImport("user32.DLL", EntryPoint = "ReleaseCapture")]
         private extern static void ReleaseCapture();
 
@@ -42,9 +42,7 @@ namespace EFAS
             {
                 if (isRegisterMode)
                 {
-                    // ==========================================
-                    // KUTUSUZ ÜYE OLMA İŞLEMİ
-                    // ==========================================
+                    
                     var existingUser = connection.QueryFirstOrDefault("SELECT * FROM Users WHERE Username = @User", new { User = username });
                     if (existingUser != null)
                     {
@@ -63,9 +61,7 @@ namespace EFAS
                 }
                 else
                 {
-                    // ==========================================
                     // GİRİŞ YAPMA İŞLEMİ
-                    // ==========================================
                     string query = "SELECT * FROM Users WHERE Username = @Username AND PasswordHash = @Password";
                     var user = connection.QueryFirstOrDefault(query, new { Username = username, Password = hashedPassword });
 

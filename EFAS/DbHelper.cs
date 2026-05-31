@@ -12,7 +12,7 @@ namespace CorporateFinanceManager
         private const string DbFileName = "FinanceManager.db";
         public static string ConnectionString = $"Data Source={DbFileName};Version=3;";
 
-        // Şifreleri SHA-256 ile geri döndürülemez şekilde şifreleyen (Hash) fonksiyon
+        // hash
         public static string HashPassword(string password)
         {
             using (SHA256 sha256Hash = SHA256.Create())
@@ -27,7 +27,6 @@ namespace CorporateFinanceManager
             }
         }
 
-        // VERİTABANI İLK KURULUMU (Tüm tablolar burada yaratılır)
         public static void InitializeDatabase()
         {
             if (!File.Exists(DbFileName))
@@ -57,7 +56,7 @@ namespace CorporateFinanceManager
                     Date TEXT NOT NULL
                 );";
 
-                // 3. PERSONELLER TABLOSU (İşte olması gereken doğru yer!)
+                // 3. PERSONELLER TABLOSU 
                 string createPersonnelsTable = @"
                 CREATE TABLE IF NOT EXISTS Personnels (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,15 +81,12 @@ namespace CorporateFinanceManager
                                         new { Hash = hashedPassword });
                 }
 
-                // --- HOCA İÇİN GİZLİ TEST HESABI (DATA SEEDING) ---
                 // Sistem her açıldığında 'engin' adında bir kullanıcı var mı diye kontrol eder.
                 var hocaExists = connection.QueryFirstOrDefault("SELECT * FROM Users WHERE Username = 'engin'");
-
-                // Eğer yoksa (yani proje ilk defa hocanın bilgisayarında açılıyorsa) anında yaratır!
                 if (hocaExists == null)
                 {
                     string hocaPassword = "engin123";
-                    string hashedPassword = HashPassword(hocaPassword); // Şifreyi SHA-256 ile güvenli hale getiriyoruz
+                    string hashedPassword = HashPassword(hocaPassword);
 
                     // Hocanın hesabı için varsayılan saatlik ücreti (HourlyRate) 500 TL olarak ayarlıyoruz
                     connection.Execute("INSERT INTO Users (Username, PasswordHash, HourlyRate) VALUES ('engin', @Hash, 500)",
@@ -100,7 +96,7 @@ namespace CorporateFinanceManager
 
         }
 
-        // VERİ ÇEKMEK İÇİN KULLANILAN SAF BAĞLANTI (İçinde işlem yapılmaz, sadece kapı açar)
+        // VERİ ÇEKMEK İÇİN KULLANILAN BAĞLANTI
         public static SQLiteConnection GetConnection()
         {
             return new SQLiteConnection(ConnectionString);

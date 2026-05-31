@@ -2,11 +2,10 @@
 using System.Drawing;
 using System.Windows.Forms;
 using LiveCharts;
-using LiveCharts.Wpf; // LiveCharts arka planda WPF grafik motorunu kullanır
+using LiveCharts.Wpf;
 using LiveCharts.WinForms;
 using Dapper;
-using CorporateFinanceManager; // DbHelper için (Eğer EFAS ise EFAS olarak kalsın)
-using LiveCharts.Wpf;
+using CorporateFinanceManager; 
 
 namespace EFAS
 {
@@ -20,8 +19,6 @@ namespace EFAS
         // Form Yüklenirken Çalışacak Kodlar
         private void FormMain_Load(object sender, EventArgs e)
         {
-            // PROFESYONEL DOKUNUŞ: TabControl'ün üstteki standart sekmelerini görünmez yapıyoruz.
-            // Böylece kullanıcı sayfalar arasında sadece sol menüdeki butonlarımızla geçebilecek.
             this.WindowState = FormWindowState.Maximized;
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
@@ -36,15 +33,15 @@ namespace EFAS
         {
             using (var connection = DbHelper.GetConnection())
             {
-                // 1. Giriş hesaplarını (Users) değil, 'Personel' sayfasında yönettiğimiz gerçek çalışanları saydırıyoruz
+                
                 int totalPersonnel = connection.QueryFirstOrDefault<int>("SELECT COUNT(Id) FROM Personnels");
                 lblTotalPersonnel.Text = totalPersonnel.ToString() + " Kişi";
 
-                // 2. Şirketin o ana kadarki toplam masrafını Expenses tablosundan anlık topluyoruz
+                
                 double totalExpense = connection.QueryFirstOrDefault<double?>("SELECT SUM(Amount) FROM Expenses") ?? 0;
                 lblTotalExpense.Text = totalExpense.ToString("N0") + " ₺";
 
-                // 3. Gerçek personellerin saatlik efor maliyetlerinin ortalamasını alıyoruz
+                
                 double avgRate = connection.QueryFirstOrDefault<double?>("SELECT AVG(HourlyRate) FROM Personnels WHERE HourlyRate > 0") ?? 0;
                 lblAvgCost.Text = Math.Round(avgRate, 1).ToString() + " ₺ / Saat";
             }
@@ -67,7 +64,7 @@ namespace EFAS
                 {
                     string title = (string)expense.Title;
 
-                    // Eğer başlık 15 karakterden uzunsa, sadece ilk 15'ini alıp sonuna üç nokta koyuyoruz
+                   
                     if (title.Length > 15)
                     {
                         title = title.Substring(0, 15) + "...";
@@ -87,16 +84,16 @@ namespace EFAS
                     DataLabels = true,
                     MaxColumnWidth = 60,
                     Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(60, 179, 113)),
-                    // Çubukların tepesinde yazan rakamları (Örn: 20000) daha koyu ve belirgin yaptık
+                    // Çubukların tepesinde yazan rakamları daha koyu ve belirgin yaptık
                     Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(30, 30, 30))
                 };
 
                 myChart.Series.Add(columnSeries);
 
 
-                // ==========================================
+
                 // ALT EKSEN (Harcama Kalemleri - Çapraz ve Kırpılmış)
-                // ==========================================
+
                 myChart.AxisX.Add(new LiveCharts.Wpf.Axis
                 {
                     Title = "Harcama Kalemleri",
@@ -107,16 +104,15 @@ namespace EFAS
                     Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 40, 40))
                 });
 
-                // ==========================================
                 // SOL EKSEN (Maliyet - Tavan Boşluğu Eklendi)
-                // ==========================================
+
                 myChart.AxisY.Add(new LiveCharts.Wpf.Axis
                 {
                     Title = "Maliyet (TL)",
                     LabelFormatter = value => value.ToString("N0") + " ₺",
                     MinValue = 0,
-                    MaxValue = maxAmount * 1.2, // İŞTE SİHİR BURADA: Tavanı %20 oranında yukarı çekerek grafiğe nefes aldırır
-                    FontSize = 13, // Yazıları büyüttük
+                    MaxValue = maxAmount * 1.1, // İŞTE SİHİR BURADA: Tavanı %10 oranında yukarı çekerek grafiğe nefes aldırır
+                    FontSize = 13, // 
                     Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(40, 40, 40))
                 });
             }
@@ -126,16 +122,8 @@ namespace EFAS
         {
             using (var connection = DbHelper.GetConnection())
             {
-                // Veritabanındaki harcamaları az önce oluşturduğumuz ExpenseModel formatında çekiyoruz
+             
                 var expenses = connection.Query<ExpenseModel>("SELECT * FROM Expenses").AsList();
-
-                // Eğer veritabanı boşsa, test için sahte veriler ekleyelim
-                if (expenses.Count == 0)
-                {
-                    expenses.Add(new ExpenseModel { Id = 1, Title = "Performans Kayışı & Yağ Bakımı", Amount = 1500 });
-                    expenses.Add(new ExpenseModel { Id = 2, Title = "Protein Tozu Stoğu", Amount = 3200 });
-                    expenses.Add(new ExpenseModel { Id = 3, Title = "Yeni Kask (ECE Sertifikalı)", Amount = 4500 });
-                }
 
 
             }
@@ -166,11 +154,9 @@ namespace EFAS
                 {
                     dt.Load(reader);
                 }
-
-                // 4. Jilet gibi temizlenmiş veriyi ekrana basıyoruz
+          
                 dgvExpenses.DataSource = dt;
 
-                // 5. Arka planda silme işlemi için duran Id'yi gizliyoruz
                 if (dgvExpenses.Columns["Id"] != null)
                 {
                     dgvExpenses.Columns["Id"].Visible = false;
@@ -179,7 +165,6 @@ namespace EFAS
         }
 
         // 2. YENİ HARCAMA EKLEME (CREATE)
-        // Ekle butonuna çift tıklayıp içine şu kodları yaz:
         private void btnAddExpense_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtExpenseTitle.Text) || string.IsNullOrWhiteSpace(txtExpenseAmount.Text))
@@ -237,6 +222,8 @@ namespace EFAS
         private void btnDashboard_Click(object sender, EventArgs e)
         {
             tabControl1.SelectedIndex = 0;
+            LoadDashboardStats();
+            LoadDashboardChart();
         }
 
         private void btnExpenses_Click(object sender, EventArgs e)
@@ -346,51 +333,37 @@ namespace EFAS
             LoadPersonnels();
         }
 
-        private void btnDeleteExpense_Click_1(object sender, EventArgs e)
-        {
-
-        }
 
 
         // Parametre olarak dışarıdan bir DataGridView (dgv) alan genel makyaj metodumuz
         private void TabloMakyajiniUygula(DataGridView dgv)
         {
-            // Tablonun genel arka planı ve dış çizgilerini temizliyoruz
+
             dgv.BackgroundColor = Color.White;
             dgv.BorderStyle = BorderStyle.None;
-
-            // Sadece yatay çizgiler kalsın (Modern web sitelerindeki gibi)
             dgv.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-
-            // Satırların rengi bir beyaz, bir açık gri olsun (Gözü yormaz)
             dgv.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(245, 245, 245);
 
-            // Fareyle bir satırı seçtiğimizde o iğrenç standart mavi yerine menümüzün rengi olsun
+
             dgv.DefaultCellStyle.SelectionBackColor = Color.FromArgb(60, 60, 90);
             dgv.DefaultCellStyle.SelectionForeColor = Color.White;
-
-            // EN ÖNEMLİSİ: Windows'un o çirkin gri başlıklarını ezmek için izni kapatıyoruz!
             dgv.EnableHeadersVisualStyles = false;
-
-            // Başlıkların (Harcama Kalemi, Tutar vs.) rengini sol menüyle uyumlu yapıyoruz
             dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             dgv.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(45, 45, 75);
             dgv.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
             dgv.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             dgv.ColumnHeadersHeight = 40;
 
-            // Tablonun en altındaki o çirkin boş ekleme satırını yok et
-            dgv.AllowUserToAddRows = false;
 
-            // Tabloyu sadece "Okunabilir" yap, içindeki yazıları kimse bozamasın
+            dgv.AllowUserToAddRows = false;
             dgv.ReadOnly = true;
 
-            // Bir hücreye tıklandığında sadece o kutuyu değil, BÜTÜN SATIRI boydan boya seç
+
             dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         }
 
 
-        // 1. PERSONEL TABLOSUNU YÜKLEME (DataTable ve Dapper ile sıfır hata)
+        // 1. PERSONEL TABLOSUNU YÜKLEME
         private void LoadPersonnels()
         {
             dgvPersonel.DataSource = null;
@@ -445,9 +418,7 @@ namespace EFAS
 
                 // Listeyi anında güncelle
                 LoadPersonnels();
-
-                // Eğer Ana Sayfada personel sayısını gösteren bir metodun varsa onu da tetikle:
-                // LoadDashboardStats(); 
+                LoadDashboardStats(); 
             }
         }
 
@@ -459,7 +430,6 @@ namespace EFAS
             int selectedId = Convert.ToInt32(dgvPersonel.CurrentRow.Cells["Id"].Value);
             string selectedName = dgvPersonel.CurrentRow.Cells["Ad Soyad"].Value.ToString();
 
-            // Kurumsal programlarda silmeden önce mutlaka emin misin diye sorulur!
             DialogResult secim = MessageBox.Show($"{selectedName} adlı personeli sistemden silmek istediğinize emin misiniz?", "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (secim == DialogResult.Yes)
@@ -468,6 +438,8 @@ namespace EFAS
                 {
                     connection.Execute("DELETE FROM Personnels WHERE Id = @Id", new { Id = selectedId });
                     LoadPersonnels();
+                    LoadDashboardStats();
+                    LoadDashboardChart();
                 }
             }
         }
@@ -493,13 +465,12 @@ namespace EFAS
                 {
                     System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-                    // 1. Önce Sütun Başlıklarını Alıyoruz
+     
                     var headers = dgvExpenses.Columns.Cast<DataGridViewColumn>()
                                           .Where(c => c.Visible) // Sadece ekranda görünenleri (Id hariç) al
                                           .Select(c => c.HeaderText);
                     sb.AppendLine(string.Join(";", headers));
 
-                    // 2. Şimdi Satırları Tek Tek Dönüp İçindeki Verileri Alıyoruz
                     foreach (DataGridViewRow row in dgvExpenses.Rows)
                     {
                         var cells = row.Cells.Cast<DataGridViewCell>()

@@ -1,0 +1,32 @@
+Sayın Hocam,
+Projenin kaynak kodları bu klasördedir.
+Sadece programı test etmek isterseniz çalıştırılabilir dosyaya şu yoldan ulaşabilirsiniz:
+EFAS\bin\Debug\net10.0-windows\EFAS.exe 
+
+
+Sisteme Giriş Bilgileri:
+Program ilk açıldığında sizin için otomatik olarak bir yönetici hesabı oluşturacaktır.
+Kullanıcı Adı: engin
+Şifre: engin123
+
+
+230401128 Yusuf Yüksel
+230401086 Yağmur Karagülle
+
+
+
+PROJENİN VİZYONU VE İŞ MANTIĞI: EFAS
+Bu projeyi standart bir "gelir-gider kayıt" programı olmanın ötesine taşıyarak, kurumsal şirketler için bir "Yatırım Verimlilik (ROI) Simülatörü" olarak tasarladım. 
+
+Sistemin kalbi olan "Verimlilik Analizi" modülü; şirketin planladığı yeni bir yatırımın (örn: sunucu altyapısı, yazılım lisansı), şirketin ortalama saatlik personel maliyeti üzerinden kendini ne kadar sürede amorti edeceğini hesaplar. Yatırımın kârlı sayılması için ekibe sağlaması gereken "iş gücü ve zaman tasarrufu" hedefini (Başabaş Noktası) yöneticiye raporlar. Vakit nakittir felsefesiyle inşa edilmiştir.
+
+KULLANILAN TEKNOLOJİLER VE MİMARİ BİLGİSİ:
+1. Veritabanı ve ORM: SQLite kullanılmıştır. Ham ADO.NET yerine performans ve kod okunabilirliği açısından mikro-ORM aracı olan "Dapper" tercih edilmiştir. Tam kapsamlı CRUD işlemleri entegredir.
+2. Dinamik UI ve Veri Görselleştirme: Standart WinForms araçları yerine, veritabanındaki değişiklikleri anlık ve animasyonlu olarak yansıtan "LiveCharts" kütüphanesi entegre edilmiştir.
+3. Clean Code & UX: Modern arayüz prensipleri gözetilmiş, DataGridView tabloları özelleştirilmiş ve tüm uyarı/hata kontrolleri (Null exception, TryParse) yapılmıştır.
+4. Raporlama: Gider tabloları, Türkçe karakterlerin (İ, Ş, Ğ vb.) bozulmasını engelleyen UTF-8 kalkanı ile Excel (CSV) formatında dışa aktarılabilmektedir.
+
+Vakit ayırıp incelediğiniz için teşekkür ederim.
+Saygılarımızla,
+Yusuf Yüksel
+Yağmur Karagülle
